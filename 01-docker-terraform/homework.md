@@ -129,6 +129,18 @@ For the passengers picked up in September 2019 in the zone name Astoria which wa
 
 Note: it's not a typo, it's `tip` , not `trip`
 
+```postgresql
+SELECT zpu."Zone" pickup_zone, zdo."Zone" dropoff_zone, max(tip_amount)
+FROM green_taxi_data g
+JOIN zones zpu ON g."PULocationID" = zpu."LocationID"
+JOIN zones zdo ON g."DOLocationID" = zdo."LocationID"
+WHERE DATE(lpep_pickup_datetime) BETWEEN '2019-09-01' AND '2019-09-30' AND zpu."Zone" ='Astoria'
+GROUP BY 1, 2
+
+```
+Ans -> JFK Airport
+
+
 * Central Park
 * Jamaica
 * JFK Airport
