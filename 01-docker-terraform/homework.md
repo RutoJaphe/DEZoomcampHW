@@ -50,6 +50,18 @@ You will also need the dataset zones:
 
 `wget https://s3.amazonaws.com/nyc-tlc/misc/taxi+_zone_lookup.csv`
 
+```bash
+URL="https://github.com/DataTalksClub/nyc-tlc-data/releases/download/green/green_tripdata_2019-09.csv.gz"
+python ingest_data.py \
+     --user=root \
+     --password=root \
+     --host=localhost \
+     --port=5432 \
+     --db=ny_taxihw \
+     --table_name=green_taxi_data \
+     --url=${URL}
+
+```
 Download this data and put it into Postgres (with jupyter notebooks or with a pipeline)
 
 ## Question 3. Count records
@@ -59,6 +71,11 @@ How many taxi trips were totally made on September 18th 2019?
 Tip: started and finished on 2019-09-18.
 
 Remember that `lpep_pickup_datetime` and `lpep_dropoff_datetime` columns are in the format timestamp (date and hour+min+sec) and not in date.
+```postgresql
+SELECT count(1) FROM green_taxi_data
+WHERE DATE(lpep_pickup_datetime) = '2019-09-18'
+```
+Ans -> 15767
 
 * 15767
 * 15612
@@ -68,6 +85,14 @@ Remember that `lpep_pickup_datetime` and `lpep_dropoff_datetime` columns are in 
 ## Question 4. Largest trip for each day
 
 Which was the pick up day with the largest trip distance Use the pick up time for your calculations.
+```postgresql
+SELECT lpep_pickup_datetime, max(trip_distance)
+FROM green_taxi_data g
+GROUP BY 2 desc
+LIMIT 1;
+```
+Ans -> 2019-09-26
+
 
 * 2019-09-18
 * 2019-09-16
@@ -79,6 +104,19 @@ Which was the pick up day with the largest trip distance Use the pick up time fo
 Consider `lpep_pickup_datetime` in '2019-09-18' and ignoring Borough has Unknown
 
 Which were the 3 pick up Boroughs that had a sum of total_amount superior to 50000?
+
+```postgresql
+SELECT z."Borough", sum(total_amount)
+FROM green_taxi_data g
+INNER JOIN zones z on g."PULocationID" = z."LocationID" and g."DOLocationID" = z."LocationID"
+WHERE z."Borough" != 'Unknown' 
+GROUP BY 1
+HAVING sum(total_amount) > 50000
+ORDER BY 2 desc
+```
+
+Ans -> "Brooklyn" "Manhattan" "Queens"
+
 
 * "Brooklyn" "Manhattan" "Queens"
 * "Bronx" "Brooklyn" "Manhattan"
